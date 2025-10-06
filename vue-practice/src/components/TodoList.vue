@@ -4,7 +4,7 @@
       <label>
         <input type="checkbox" :checked="todo.done" @change="$emit('toggle', todo.id)" />
         <span :style="todo.done ? { textDecoration: 'line-through', opacity: 0.6 } : {}">
-          {{ todo.title }}
+          {{ todo.title }}{{ todo.id }}
         </span>
       </label>
       <button @click="$emit('remove', todo.id)">削除</button>

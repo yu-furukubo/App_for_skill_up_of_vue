@@ -1,7 +1,3 @@
-<script setup lang="ts">
-import HelloWorld from "./components/HelloWorld.vue";
-</script>
-
 <template>
   <h1>My Todos</h1>
   <!-- フォームで新規Todoを追加 -->
@@ -12,23 +8,21 @@ import HelloWorld from "./components/HelloWorld.vue";
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref,computed } from 'vue'
 import TodoList from './components/TodoList.vue'
 import TodoForm from './components/TodoForm.vue'
 
-type Todo = { id: number; title: string; done: boolean }
+export type Todo = { id: number; title: string; done: boolean }
 
-const todos = ref<Todo[]>([
-  { id: 1, title: 'VueのPropsを学ぶ', done: true },
-  { id: 2, title: 'Emitの使い方を理解する', done: false },
-])
+const todos = ref<Todo[]>([])
 
-let nextId = 3
+let nextId = computed<number>(()=>
+  todos.value.length+1
+)
 
 function addTodo(title: string) {
   if (!title.trim()) return
-  todos.value.push({ id: nextId++, title: title.trim(), done: false })
-  console.log(todos.value[todos.value.length - 1].title)
+  todos.value.push({ id: nextId.value, title: title.trim(), done: false })
 }
 
 function toggleTodo(id: number) {
