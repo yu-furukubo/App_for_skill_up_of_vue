@@ -13,8 +13,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
-import type { Todo } from './../composables/useTodos.ts';
+import { defineProps, defineEmits, onUnmounted } from 'vue';
+import { useTodoStore } from '@/stores/todo';
+import type { Todo } from '@/stores/todo'
 
 defineProps<{ todos: Todo[] }>();
 
@@ -22,4 +23,11 @@ defineEmits<{
   (e: 'toggle', id: number): void;
   (e: 'remove', id: number): void;
 }>();
+
+const store = useTodoStore()
+
+onUnmounted(()=>{
+  console.log('TodoList destroyed → cleaning up done todos...')
+  store.cleanup()
+})
 </script>
