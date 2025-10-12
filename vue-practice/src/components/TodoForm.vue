@@ -1,7 +1,7 @@
 <template>
   <p>{{ text }}</p>
   <form @submit.prevent="submitTodo">
-    <input v-model="title" placeholder="やることを入力" />
+    <input v-model="title" placeholder="Todoを入力" />
     <button type="submit">追加</button>
   </form>
 </template>

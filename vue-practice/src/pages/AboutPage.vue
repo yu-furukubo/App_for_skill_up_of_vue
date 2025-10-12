@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>About</h1>
-    <p>これはTodoアプリの学習用ページです。</p>
+    <p>これはVueの学習用ページです。</p>
   </div>
 </template>
 
