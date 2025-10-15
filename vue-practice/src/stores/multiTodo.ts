@@ -1,14 +1,42 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref , reactive, computed, watch} from 'vue'
 
 export type Todo = { id: number; title: string; done: boolean }
 export type TodoList = { name: string; todos: Todo[] }
 
+function reactiveTodoList(name: string, todos: Todo[] = []) {
+  return reactive<TodoList>({ name, todos })
+}
+type RTodoList = ReturnType<typeof reactiveTodoList>
+
 export const useMultiTodoStore = defineStore('multiTodo', () => {
-  const lists = ref<Record<number, TodoList>>({})
+  const lists = ref<Record<number, RTodoList>>({})
   const listIds = ref<number[]>([])
 
   const getList = (listId: number) => (lists.value[listId] ??= { name: '', todos: [] })
+
+  const remainingMap = computed<Record<number, number>>(() => {
+    const out: Record<number, number> = {}
+    for (const id of listIds.value) {
+      const l = lists.value[id]
+      out[id] = l ? l.todos.filter(t => !t.done).length : 0
+    }
+    return out
+  })
+
+  const lastDeltaMsg = ref<string | null>(null)
+  watch(remainingMap, (nv, ov) => {
+    // 初回は ov が空なのでスキップ
+    if (!ov) return
+    for (const id of Object.keys(nv)) {
+      const nid = Number(id)
+      const diff = (nv[nid] ?? 0) - (ov[nid] ?? 0)
+      if (diff !== 0) {
+        lastDeltaMsg.value =
+          diff > 0 ? `List#${nid} の未完了が ${diff} 件増加` : `List#${nid} の未完了が ${-diff} 件減少`
+      }
+    }
+  })
 
   function createList(name: string) {
     const next = (listIds.value[listIds.value.length - 1] ?? 0) + 1
@@ -51,7 +79,7 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
     listIds.value = listIds.value.filter(id => id !== listId) // ID一覧からも除外
   }
 
-  return { lists, listIds, getList, createList, add, toggle, remove, clear, cleanup, removeList }
+  return { lists, listIds, getList, createList, add, toggle, remove, clear, cleanup, removeList , remainingMap, lastDeltaMsg}
 }, {
   persist: true
 })
