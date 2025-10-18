@@ -12,5 +12,5 @@
 <script setup lang="ts">
 import { useMultiTodoStore } from '@/stores/multiTodo';
 const store = useMultiTodoStore()
-defineProps<{ listId: number }>()
+const { listId } = defineProps<{ listId: number }>()
 </script>

@@ -14,10 +14,10 @@ const routes = [
     path: '/lists/:listId(\\d+)',
     name: 'list',
     component: ListLayout,
-    props: true,
+    props: route => ({ listId: Number(route.params.listId) }),
     children: [
-      { path: '',          name: 'list-todos',    component: ListTodos,    props: true },
-      { path: 'settings',  name: 'list-settings', component: ListSettings, props: true },
+      { path: '',          name: 'list-todos',    component: ListTodos,    props: route => ({ listId: Number(route.params.listId) }) },
+      { path: 'settings',  name: 'list-settings', component: ListSettings, props: route => ({ listId: Number(route.params.listId) }) },
     ],
   },
 ]
