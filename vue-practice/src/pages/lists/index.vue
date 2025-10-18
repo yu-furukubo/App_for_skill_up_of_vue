@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useMultiTodoStore } from '@/stores/multiTodo'
@@ -39,12 +39,15 @@ function goList(id:number){
   router.push(`/lists/${id}`)
 }
 
-function onCreate() {
-  store.createList(listName.value)
+async function onCreate() {
+  // store.createList(listName.value)
+  await store.createListRemote(listName.value)
   listName.value = ''
 }
 
 function removeList(id:number){
   store.removeList(id)
 }
+onMounted(() => console.log('List一覧 onMounted'))
+onUnmounted(() => console.log('List一覧 onUnmounted'))
 </script>

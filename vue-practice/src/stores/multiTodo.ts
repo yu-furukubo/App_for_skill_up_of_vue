@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref , reactive, computed, watch} from 'vue'
+import { createList as apiCreateList } from '@/api/lists' 
 
 export type Todo = { id: number; title: string; done: boolean }
-export type TodoList = { name: string; todos: Todo[] }
+export type TodoList = { name: string; todos: Todo[]; serverId?: number | string }
 
 function reactiveTodoList(name: string, todos: Todo[] = []) {
   return reactive<TodoList>({ name, todos })
@@ -25,23 +26,58 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
   })
 
   const lastDeltaMsg = ref<string | null>(null)
+  const prevRemaining = ref<Record<number, number>>({})
   watch(remainingMap, (nv, ov) => {
-    // 初回は ov が空なのでスキップ
-    if (!ov) return
-    for (const id of Object.keys(nv)) {
-      const nid = Number(id)
-      const diff = (nv[nid] ?? 0) - (ov[nid] ?? 0)
-      if (diff !== 0) {
-        lastDeltaMsg.value =
-          diff > 0 ? `List#${nid} の未完了が ${diff} 件増加` : `List#${nid} の未完了が ${-diff} 件減少`
-      }
-    }
-  })
+    const old = ov ?? prevRemaining.value
+    if (!old) return
+
+    // 直近で変化したリストのみを抽出
+    const changedIds = Object.keys(nv).filter(
+      id => (nv[+id] ?? 0) !== (old[+id] ?? 0)
+    )
+
+    // 1件も変化がなければ終了
+    if (!changedIds.length) return
+
+    // 変更されたリストのうち、最後に操作された（更新時刻が新しい）ものだけを対象にする
+    // → store 内で "lastUpdatedListId" を更新しているならそれを優先的に利用
+    // そうでなければ、ここでは「最後の変更ID」を採用
+    const lastChangedId = Number(changedIds[changedIds.length - 1])
+
+    const diff =
+      (nv[lastChangedId] ?? 0) - (old[lastChangedId] ?? 0)
+
+    const listName =
+      lists.value[lastChangedId]?.name ?? `List#${lastChangedId}`
+
+    lastDeltaMsg.value =
+      diff > 0
+        ? `${listName} の未完了が ${diff} 件増加`
+        : `${listName} の未完了が ${-diff} 件減少`
+
+    // 次回比較用に最新値を保持
+    prevRemaining.value = structuredClone(nv)
+    },
+    { deep: true }
+  )
 
   function createList(name: string) {
     const next = (listIds.value[listIds.value.length - 1] ?? 0) + 1
     listIds.value.push(next)
     lists.value[next] = { name: name.trim() || `List${next}`, todos: [] }
+    return next
+  }
+
+  async function createListRemote(name: string) {
+    const res = await apiCreateList(name)        // { id: 173..., name: '...' } など
+    const last = listIds.value.length ? listIds.value[listIds.value.length - 1]! : 0
+    const next = last + 1                        // ← ローカルID（小さい連番）
+    listIds.value.push(next)
+    lists.value[next] = {
+      name: (res.name ?? name).trim() || `List${next}`,
+      todos: [],
+      serverId: res.id,                          // ← ここで型OKになる
+    }
     return next
   }
 
@@ -79,7 +115,7 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
     listIds.value = listIds.value.filter(id => id !== listId) // ID一覧からも除外
   }
 
-  return { lists, listIds, getList, createList, add, toggle, remove, clear, cleanup, removeList , remainingMap, lastDeltaMsg}
+  return { lists, listIds, getList, createList,createListRemote, add, toggle, remove, clear, cleanup, removeList , remainingMap, lastDeltaMsg}
 }, {
   persist: true
 })
