@@ -28,6 +28,6 @@ const multiStore = useMultiTodoStore()
 
 onUnmounted(()=>{
   console.log('TodoList destroyed → cleaning up done todos...')
-  multiStore.cleanup()
+  // multiStore.cleanup()
 })
 </script>
