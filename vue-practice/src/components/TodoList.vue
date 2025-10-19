@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, onUnmounted } from 'vue';
-import { useMultiTodoStore } from '@/stores/multiTodo';
+// import { useMultiTodoStore } from '@/stores/multiTodo';
 import type { Todo } from '@/stores/multiTodo'
 
 defineProps<{ todos: Todo[] }>();
@@ -24,7 +24,7 @@ defineEmits<{
   (e: 'remove', id: number): void;
 }>();
 
-const multiStore = useMultiTodoStore()
+// const multiStore = useMultiTodoStore()
 
 onUnmounted(()=>{
   console.log('TodoList destroyed → cleaning up done todos...')
