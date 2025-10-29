@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref , reactive, computed, watch} from 'vue'
+import { createList as apiCreateList } from '@/api/lists'
 
 export type Todo = { id: number; title: string; done: boolean }
 export type TodoList = { name: string; todos: Todo[] }
@@ -26,7 +27,6 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
 
   const lastDeltaMsg = ref<string | null>(null)
   watch(remainingMap, (nv, ov) => {
-    // 初回は ov が空なのでスキップ
     if (!ov) return
     for (const id of Object.keys(nv)) {
       const nid = Number(id)
@@ -43,6 +43,13 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
     listIds.value.push(next)
     lists.value[next] = { name: name.trim() || `List${next}`, todos: [] }
     return next
+  }
+
+  async function createListRemote(name: string) {
+    const { id, name: resolved } = await apiCreateList(name)
+    lists.value[id] = { name: (resolved ?? name).trim() || `List${id}`, todos: [] }
+    listIds.value.push(id)
+    return id
   }
 
   function add(listId: number, title: string) {
@@ -79,7 +86,7 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
     listIds.value = listIds.value.filter(id => id !== listId) // ID一覧からも除外
   }
 
-  return { lists, listIds, getList, createList, add, toggle, remove, clear, cleanup, removeList , remainingMap, lastDeltaMsg}
+  return { lists, listIds, getList, createList, add, toggle, remove, clear, cleanup, removeList , remainingMap, lastDeltaMsg,createListRemote}
 }, {
   persist: true
 })

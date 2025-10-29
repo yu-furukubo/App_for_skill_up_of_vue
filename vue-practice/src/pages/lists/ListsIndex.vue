@@ -7,9 +7,7 @@
     </form>
 
   <div>
-    <!-- watchで更新されるメッセージ -->
     <transition name="fade">
-      <!-- refはテンプレートで自動アンラップされる -->
       <p v-if="lastDeltaMsg" class="delta-msg">{{ lastDeltaMsg }}</p>
     </transition>
   </div>
@@ -39,8 +37,13 @@ function goList(id:number){
   router.push(`/lists/${id}`)
 }
 
-function onCreate() {
-  store.createList(listName.value)
+// function onCreate() {
+//   store.createList(listName.value)
+//   listName.value = ''
+// }
+
+async function onCreate() {
+  await store.createListRemote(listName.value)  // ← ここだけ変更
   listName.value = ''
 }
 

@@ -13,7 +13,6 @@ const title = ref('');
 
 defineProps<{ text: string }>();
 
-// 親にイベント通知（emit）
 const emit = defineEmits<{ (e: 'submit', title: string): void }>();
 
 function submitTodo() {
