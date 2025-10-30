@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "verbatimModuleSyntax": false,
+    "moduleResolution": "bundler", 
+
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"],
+      "@/api/*": ["src/api/*"], 
+      "@/pages/*": ["src/pages/*"]}, 
+
+    "esModuleInterop": true,
+    "isolatedModules": true,
+
+    "types": ["vite/client", "jest", "@testing-library/jest-dom"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "env.d.ts",
+    "src/shims-vue.d.ts"
+  ]
+}

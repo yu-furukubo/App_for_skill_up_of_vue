@@ -1,16 +1,21 @@
 /** @type {import('jest').Config} */
-module.exports = {
+const config = {
   testEnvironment: 'jsdom',
-  moduleFileExtensions: ['vue','ts','tsx','js','jsx','json'],
+  preset: 'ts-jest',
   transform: {
     '^.+\\.vue$': '@vue/vue3-jest',
-    '^.+\\.(t|j)sx?$': ['ts-jest', { isolatedModules: true, tsconfig: 'tsconfig.json' }],
+    '^.+\\.(ts|tsx|js)$': ['ts-jest', { tsconfig: 'tsconfig.spec.json' }],
   },
+  moduleFileExtensions: ['vue', 'ts', 'js', 'json'],
+  roots: ['<rootDir>/src', '<rootDir>/tests'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@vue/test-utils$': '<rootDir>/node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js',
-    '\\.(css|scss|sass)$': 'identity-obj-proxy',
+    '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
   },
-  transformIgnorePatterns: ['/node_modules/(?!(@vue|vue|@testing-library)/)'],
-  setupFilesAfterEnv: ['@testing-library/jest-dom'],
-};
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'require', 'default'],
+  },
+}
+
+module.exports = config
