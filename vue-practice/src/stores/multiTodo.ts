@@ -15,6 +15,10 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
   const listIds = ref<number[]>([])
 
   const getList = (listId: number) => (lists.value[listId] ??= { name: '', todos: [] })
+  const nextListId = computed(() => {
+    if (listIds.value.length === 0) return 1
+    return Math.max(...listIds.value) + 1
+  })
 
   const remainingMap = computed<Record<number, number>>(() => {
     const out: Record<number, number> = {}
@@ -30,10 +34,11 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
     if (!ov) return
     for (const id of Object.keys(nv)) {
       const nid = Number(id)
+      const listName = lists.value[nid]?.name
       const diff = (nv[nid] ?? 0) - (ov[nid] ?? 0)
       if (diff !== 0) {
         lastDeltaMsg.value =
-          diff > 0 ? `List#${nid} の未完了が ${diff} 件増加` : `List#${nid} の未完了が ${-diff} 件減少`
+          diff > 0 ? `${listName} の未完了が ${diff} 件増加` : `${listName} の未完了が ${-diff} 件減少`
       }
     }
   })
@@ -46,9 +51,10 @@ export const useMultiTodoStore = defineStore('multiTodo', () => {
   }
 
   async function createListRemote(name: string) {
-    const { id, name: resolved } = await apiCreateList(name)
-    lists.value[id] = { name: (resolved ?? name).trim() || `List${id}`, todos: [] }
+    const id = nextListId.value
+    lists.value[id] = {name, todos:[]}
     listIds.value.push(id)
+    await apiCreateList(name)
     return id
   }
 

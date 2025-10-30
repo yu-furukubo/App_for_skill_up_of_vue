@@ -1,5 +1,10 @@
-// 実装は後で本物に差し替える前提（今はダミー）
-export async function createList(name: string): Promise<{ id: number; name: string }> {
-  // 例えば fetch/axios で POST する想定
-  return { id: Date.now(), name }
+let lists: { id: number; name: string }[] = []
+
+export async function createList(name: string): Promise<{name: string }> {
+  const maxId = lists.length > 0 ? Math.max(...lists.map(l => l.id)) : 0
+  const nextId = maxId + 1
+
+  const newList = { id: nextId, name }
+  lists.push(newList)
+  return { name: newList.name }
 }
