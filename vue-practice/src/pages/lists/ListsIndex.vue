@@ -6,16 +6,16 @@
       <button type="submit">追加</button>
     </form>
 
-  <div>
-    <transition name="fade">
-      <p v-if="lastDeltaMsg" class="delta-msg">{{ lastDeltaMsg }}</p>
-    </transition>
-  </div>
+    <div>
+      <transition name="fade">
+        <p v-if="lastDeltaMsg" class="delta-msg">{{ lastDeltaMsg }}</p>
+      </transition>
+    </div>
 
     <ul>
       <li v-for="id in listIds" :key="id" @click="goList(id)">
         <RouterLink :to="`/lists/${id}`">{{ lists[id]?.name ?? `リスト${id}` }}</RouterLink>
-        <a style="padding-left: 1em;">未完了 : {{ remainingMap[id] ?? 0 }} 件</a>
+        <a style="padding-left: 1em">未完了 : {{ remainingMap[id] ?? 0 }} 件</a>
         <button @click.stop="removeList(id)">削除</button>
       </li>
     </ul>
@@ -23,18 +23,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
-import { useMultiTodoStore } from '@/stores/multiTodo'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useMultiTodoStore } from '@/stores/multiTodo';
+import { useTodoDeltaMessage } from '@/composables/useTodoDeltaMessage';
+import { useRemoteLists } from '@/composables/useRemoteLists';
 
-const router = useRouter()
-const store = useMultiTodoStore()
-const { listIds, lists, remainingMap, lastDeltaMsg } = storeToRefs(store) 
-const listName = ref('')
+const router = useRouter();
+const store = useMultiTodoStore();
+const { listIds, lists, remainingMap } = storeToRefs(store);
+const { lastDeltaMsg } = useTodoDeltaMessage();
+const { createListRemote } = useRemoteLists(store);
+const listName = ref('');
 
-function goList(id:number){
-  router.push(`/lists/${id}`)
+function goList(id: number) {
+  router.push(`/lists/${id}`);
 }
 
 // function onCreate() {
@@ -43,11 +47,11 @@ function goList(id:number){
 // }
 
 async function onCreate() {
-  await store.createListRemote(listName.value)  // ← ここだけ変更
-  listName.value = ''
+  await createListRemote(listName.value);
+  listName.value = '';
 }
 
-function removeList(id:number){
-  store.removeList(id)
+function removeList(id: number) {
+  store.removeList(id);
 }
 </script>
